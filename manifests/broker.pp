@@ -82,16 +82,6 @@ class openshift_origin::broker {
     }
   }
   
-  file { 'broker servername config':
-    ensure  => present,
-    path    => '/etc/httpd/conf.d/000000_openshift_origin_broker_servername.conf',
-    content => template('openshift_origin/broker/broker_servername.conf.erb'),
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
-    require => Package['openshift-origin-broker'],
-  }
-
   file { 'quickstarts':
     ensure  => present,
     path    => '/etc/openshift/quickstarts.json',

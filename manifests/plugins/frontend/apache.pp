@@ -20,6 +20,16 @@ class openshift_origin::plugins::frontend::apache {
     }
   )
 
+  if 'broker' in $::openshift_origin::roles {
+    $openshift_origin_pkg  = 'openshift-origin-broker'
+    $httpd_servername_path = '/etc/httpd/conf.d/000000_openshift_origin_broker_servername.conf'
+    $openshift_origin_svc  = 'openshift-broker'
+  } elsif 'node' in $::openshift_origin::roles {
+    $openshift_origin_pkg  = 'rubygem-openshift-origin-node'
+    $httpd_servername_path = '/etc/httpd/conf.d/000001_openshift_origin_node_servername.conf'
+    $openshift_origin_svc  = 'openshift-node-web-proxy'
+  }
+
   service { 'httpd':
     enable     => true,
     ensure     => true,
@@ -29,17 +39,18 @@ class openshift_origin::plugins::frontend::apache {
     provider   => $openshift_origin::params::os_init_provider,
   }
   
-  file { 'node servername config':
+  file { 'servername config':
     ensure  => present,
-    path    => '/etc/httpd/conf.d/000001_openshift_origin_node_servername.conf',
-    content => template('openshift_origin/plugins/frontend/apache/openshift-origin-node_servername.conf.erb'),
+    path    => $httpd_servername_path,
+    content => template('openshift_origin/plugins/frontend/apache/servername.conf.erb'),
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
-    require => Package['rubygem-openshift-origin-node'],
+    require => Package[$openshift_origin_pkg],
+    notify  => Service[$openshift_origin_svc],
   }
   
-  if $::operatingsystem == "Fedora" {
+  if $::operatingsystem == "Fedora" and 'node' in $::openshift_origin::roles {
     file { 'allow cartridge files through apache':
       ensure  => present,
       path    => '/etc/httpd/conf.d/cartridge_files.conf',
@@ -48,6 +59,7 @@ class openshift_origin::plugins::frontend::apache {
       group   => 'root',
       mode    => '0660',
       require =>  Package['httpd'],
+      notify  => Service['httpd'],
     }
   }
 }
