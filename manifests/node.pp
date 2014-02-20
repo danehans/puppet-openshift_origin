@@ -164,10 +164,22 @@ class openshift_origin::node {
       command     => '/sbin/restorecon -rv /etc/cgconfig.conf; mkdir -p /cgroup; restorecon -rv /cgroup',
       refreshonly => true
     }
+  }
 
-    service { ['cgconfig', 'cgred']:
-      enable => true
-    } 
+  service { 'cgconfig':
+    ensure     => true,
+    enable     => true,
+    hasstatus  => true,
+    hasrestart => true,
+    require    => Package['openshift-origin-node-util'],
+  }
+
+  service { 'cgred':
+    ensure     => true,
+    enable     => true,
+    hasstatus  => true,
+    hasrestart => true,
+    require    => [Service['cgconfig'],Package['openshift-origin-node-util']],
   }
 
   service { ['openshift-gears']:
