@@ -99,8 +99,9 @@ if ! [ -d openshift_origin ]; then
 fi
 
 # Install module dependencies
-puppet module install puppetlabs/stdlib
-puppet module install puppetlabs/ntp
+puppet module install puppetlabs-stdlib
+puppet module install puppetlabs-ntp
+git clone -b keyfile https://github.com/danehans/puppetlabs-mongodb.git /etc/puppet/modules/mongodb
 
 # Configure the Puppet manifest
 if [ "${INSTALL_TYPE}" == "broker" ] ; then
