@@ -90,8 +90,8 @@ class openshift_origin::role::activemq inherits openshift_origin::role {
 }
 
 class openshift_origin::role::datastore inherits openshift_origin::role {
+  require 'openshift_origin::db::mongo'
   register_dns{ 'register datastore dns':
-    fqdn => $::openshift_origin::datastore_hostname 
+    fqdn => $::openshift_origin::datastore_hostname
   }
-  ensure_resource( 'class', 'openshift_origin::mongo', {} ) 
 }

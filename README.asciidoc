@@ -288,6 +288,12 @@ CONF_NO_DATASTORE_AUTH_FOR_LOCALHOST is enabled.
 
 Default: admin/mongopass
 
+==== mongodb_admin_password_hash
+Hex encoded md5 hash of:
+"$mongodb_admin_user:mongo:$mongodb_admin_password".
+
+Default: false
+
 ==== mongodb_broker_user
 ==== mongodb_broker_password
 These are the username and password of the normal user that will be

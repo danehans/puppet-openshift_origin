@@ -190,16 +190,20 @@
 # [*mongodb_admin_password*]
 #   Default: admin/mongopass
 #   These are the username and password of the administrative user that
-#   will be created in the MongoDB datastore. These credentials are not
-#   used by in this script or by OpenShift, but an administrative user
-#   must be added to MongoDB in order for it to enforce authentication.
+#   will be created in the MongoDB datastore and must be added to
+#   MongoDB in order for it to enforce authentication.
 #   Note: The administrative user will not be created if
 #   CONF_NO_DATASTORE_AUTH_FOR_LOCALHOST is enabled.
-# 
+#
+# [*mongodb_admin_password_hash*]
+#   Default: false
+#   Hex encoded md5 hash of:
+#     "$mongodb_admin_user:mongo:$mongodb_admin_password"
+#
 # [*mongodb_broker_user*]
 # [*mongodb_broker_password*]
 #   Default: openshift/mongopass
-#   These are the username and password of the normal user that will be
+#   These are the username and password of the user that will be
 #   created for the broker to connect to the MongoDB datastore. The
 #   broker application's MongoDB plugin is also configured with these
 #   values.
@@ -494,6 +498,13 @@ class openshift_origin (
   $named_hostname                       = "ns1.${domain}",
   $activemq_hostname                    = "activemq.${domain}",
   $datastore_hostname                   = "mongodb.${domain}",
+  $datastore1_hostname                  = $datastore_hostname,
+  $datastore2_hostname                  = "mongodb02.${domain}",
+  $datastore3_hostname                  = "mongodb03.${domain}",
+  $datastore1_ip                        = undef,
+  $datastore2_ip                        = undef,
+  $datastore3_ip                        = undef,
+  $datastore_bind_port                  = '27017',
   $named_ip_addr                        = $ipaddress,
   $bind_key                             = '',
   $bind_krb_keytab                      = '',
@@ -501,18 +512,32 @@ class openshift_origin (
   $aws_access_key_id                    = '',
   $aws_secret_key                       = '',
   $aws_zone_id                          = '',
+  $datastore_bind_ip                    = $ipaddress,
   $broker_ip_addr                       = $ipaddress,
+  $enable_replica_sets                  = false,
+  $replica_sets_name                    = 'openshift',
+#  $replica_sets_master                  = undef,
+  $replica_sets_members                 = ["${datastore1_hostname}:27017", "${datastore2_hostname}:27017", "${datastore3_hostname}:27017"],
+  $replica_sets_keyfile                 = '/etc/mongodb.keyfile',
+  $replica_sets_key                     = undef,
   $node_ip_addr                         = $ipaddress,
   $configure_ntp                        = true,  
   $ntp_servers                          = ['time.apple.com iburst', 'pool.ntp.org iburst', 'clock.redhat.com iburst'],
   $activemq_admin_password              = inline_template('<%= require "securerandom"; SecureRandom.base64 %>'),
   $mcollective_user                     = 'mcollective',
   $mcollective_password                 = 'marionette',
+  $mongodb_create_db                    = true,
+  $mongodb_create_admin_user            = true,
   $mongodb_admin_user                   = 'admin',
   $mongodb_admin_password               = 'mongopass',
+  $mongodb_admin_password_hash          = false,
   $mongodb_broker_user                  = 'openshift',
   $mongodb_broker_password              = 'mongopass',
   $mongodb_name                         = 'openshift_broker',
+  $mongodb_auth                         = true,
+  $mongodb_verbose                      = false,
+  $mongodb_smallfiles                   = true,
+  $mongodb_rest                         = false,
   $openshift_user1                      = 'demo',
   $openshift_password1                  = 'changeme',
   $conf_broker_auth_salt                = inline_template('<%= require "securerandom"; SecureRandom.base64 %>'),
