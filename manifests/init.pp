@@ -516,7 +516,7 @@ class openshift_origin (
   $broker_ip_addr                       = $ipaddress,
   $enable_replica_sets                  = false,
   $replica_sets_name                    = 'openshift',
-#  $replica_sets_master                  = undef,
+  $replica_sets_master                  = undef,
   $replica_sets_members                 = ["${datastore1_hostname}:27017", "${datastore2_hostname}:27017", "${datastore3_hostname}:27017"],
   $replica_sets_keyfile                 = '/etc/mongodb.keyfile',
   $replica_sets_key                     = undef,

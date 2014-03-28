@@ -12,6 +12,7 @@ class openshift_origin::db::mongo(
   $create_admin_user     = $::openshift_origin::mongodb_create_admin_user,
   $enable_replica_sets   = $::openshift_origin::enable_replica_sets,
   $replica_sets_name     = $::openshift_origin::replica_sets_name,
+  $replica_sets_master   = $::openshift_origin::replica_sets_master,
   $replica_sets_host1    = $::openshift_origin::datastore1_hostname,
   $replica_sets_host2    = $::openshift_origin::datastore2_hostname,
   $replica_sets_host3    = $::openshift_origin::datastore3_hostname,
@@ -39,10 +40,6 @@ class openshift_origin::db::mongo(
   $broker_role           = ['readWrite', 'dbAdmin', 'userAdmin', 'clusterAdmin']
 ) {
 
-  if $create_db {
-    Mongodb_database[$openshift_db_name] -> Mongodb_user[$broker_user]
-  }
-
   if $::operatingsystem == 'RedHat' {
     require 'mongodb::client'
   }
@@ -58,23 +55,6 @@ class openshift_origin::db::mongo(
     host { $replica_sets_host3:
       ip => $replica_sets_host3_ip,
     }
-    if $create_admin_user {
-      Mongodb_user[$admin_user] -> Mongodb_replset[$replica_sets_name]
-    }
-    if $create_db {
-      Mongodb::Db[$openshift_db_name] -> Mongodb_replset[$replica_sets_name]
-    }
-    mongodb_replset { $replica_sets_name_real:
-      ensure   => present,
-      auth     => $auth,
-      user     => $admin_user,
-      password => $admin_password,
-      members  => [
-                   "${replica_sets_host1}:${bind_port}",
-                   "${replica_sets_host2}:${bind_port}",
-                   "${replica_sets_host3}:${bind_port}"
-                 ],
-    }
   } else {
     $replica_sets_name_real = undef
   }
@@ -86,17 +66,23 @@ class openshift_origin::db::mongo(
   }
 
   class {'mongodb::server':
-    ensure     => true,
-    bind_ip    => $bind_ip,
-    port       => $bind_port,
-    smallfiles => $smallfiles,
-    verbose    => $verbose,
-    auth       => $auth,
-    rest       => $rest,
-    replset    => $replica_sets_name_real,
-    keyfile    => $keyfile_real,
-    key        => $replica_sets_key,
-    require    => Class['openshift_origin::yum_install_method'],
+    ensure           => true,
+    bind_ip          => $bind_ip,
+    port             => $bind_port,
+    smallfiles       => $smallfiles,
+    verbose          => $verbose,
+    auth             => $auth,
+    rest             => $rest,
+    replset          => $replica_sets_name_real,
+    replset_master   => $replica_sets_master,
+    replset_user     => $admin_user,
+    replset_password => $admin_password,
+    replset_host1    => $replica_sets_host1,
+    replset_host2    => $replica_sets_host2,
+    replset_host3    => $replica_sets_host3,
+    keyfile          => $keyfile_real,
+    key              => $replica_sets_key,
+    require          => Class['openshift_origin::yum_install_method'],
   }
 
   if $create_admin_user {
