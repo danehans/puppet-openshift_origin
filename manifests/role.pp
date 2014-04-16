@@ -95,3 +95,10 @@ class openshift_origin::role::datastore inherits openshift_origin::role {
   }
   ensure_resource( 'class', 'openshift_origin::mongo', {} ) 
 }
+
+class openshift_origin::role::load_balancer inherits openshift_origin::role {
+  register_dns{ 'register virtual broker dns':
+    fqdn => $::openshift_origin::broker_vitual_hostname
+  }
+  include openshift_origin::load_balancer
+}
