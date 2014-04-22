@@ -86,6 +86,7 @@ class openshift_origin::activemq {
       hasstatus  => true,
       hasrestart => true,
       enable     => true,
+      ensure     => true,
     }
   )
 
