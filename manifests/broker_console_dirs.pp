@@ -17,6 +17,7 @@ class openshift_origin::broker_console_dirs {
     [
       '/etc/openshift',
       '/var/log/openshift',
+      '/var/www',
       '/var/www/openshift',
     ]:
     ensure => directory
