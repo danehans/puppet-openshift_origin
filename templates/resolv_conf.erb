@@ -1,0 +1,8 @@
+search <%= scope.lookupvar('::openshift_origin::domain') %>
+<% if scope.lookupvar('::openshift_origin::nameserver_ha') then
+scope.lookupvar('::openshift_origin::nameserver_members').each do |nameserver_member| -%>
+nameserver <%= nameserver_member %>
+<% end -%>
+<% else -%>
+nameserver <%= scope.lookupvar('::openshift_origin::nameserver_ip_addr') %>
+<% end -%>

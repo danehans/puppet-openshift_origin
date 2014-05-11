@@ -120,6 +120,27 @@
 #   node. This is used by every node to configure its primary name server.
 #   Default: the current IP (at install)
 #
+#   This is also used by Nameserver slave members to identify the primary
+#   (aka master) Nameserver server when nameserver_ha is set to true.
+#   Default: the current IP (at install)  
+#
+# [*nameserver_ha*]
+#   Default: false
+#   Set to true to configure Nameserver service high-availability (master/slave).
+#   Note: nameserver_ha requires at least 2 servers for high-availability.
+#
+# [*nameserver_members*]
+#   Default: undef
+#   An array of Nameserver server IP addresses. The array should start with the
+#   Nameserver master IP address, followed by Nameserver Slave IP address(es).
+#   Requires setting nameserver_ha to true.
+#
+# [*nameserver_master*]
+#   Default: false
+#   Specifies whether the server is a Nameserver master or slave. Available options
+#   are true for Nameserver master and false Nameserver slave. Requires setting nameserver_ha
+#   to true.
+#   
 # [*bind_key*]
 #   When the nameserver is remote, use this to specify the HMAC-MD5 key
 #   for updates. This is the "Key:" field from the .private key file
@@ -585,6 +606,9 @@ class openshift_origin (
   $datastore2_ip_addr                   = undef,
   $datastore3_ip_addr                   = undef,
   $nameserver_ip_addr                   = $ipaddress,
+  $nameserver_ha                        = false,
+  $nameserver_members                   = undef,
+  $nameserver_master                    = false,
   $bind_key                             = '',
   $bind_krb_keytab                      = '',
   $bind_krb_principal                   = '',
@@ -663,6 +687,14 @@ class openshift_origin (
 
   if $msgserver_cluster and ! $msgserver_cluster_members and ! $mcollective_cluster_members {
     fail('msgserver_cluster_members and mcollective_cluster_members parameters are required when msgserver_cluster is set')
+  }
+
+  if $nameserver_ha and ! $nameserver_members {
+    fail('nameserver_members parameter is required when setting nameserver_ha to true')
+  }
+  
+  if $nameserver_ha and $nameserver_master == false and $nameserver_ip_addr == $ipaddress {
+    fail('nameserver_ip_addr parameter must be set to the Nameserver master IP address when nameserver_master is false')
   }
 
   if member( $roles, 'nameserver' ) {

@@ -1,14 +1,24 @@
 $ORIGIN .
 $TTL 1800
-<%= scope.lookupvar('::openshift_origin::domain') %> IN SOA <%= scope.lookupvar('::openshift_origin::nameserver_hostname') %>. hostmaster.<%= scope.lookupvar('::openshift_origin::domain') %>. (
+<%= scope.lookupvar('::openshift_origin::domain') %>        IN SOA ns1.<%= scope.lookupvar('::openshift_origin::domain') %>. hostmaster.<%= scope.lookupvar('::openshift_origin::domain') %>. (
                          2011112904 ; serial
                          60         ; refresh (1 minute)
                          15         ; retry (15 seconds)
                          1800       ; expire (30 minutes)
                          10         ; minimum (10 seconds)
                           )
-                     NS <%= scope.lookupvar('::openshift_origin::nameserver_hostname') %>.
+<% if scope.lookupvar('::openshift_origin::nameserver_ha') then
+scope.lookupvar('::openshift_origin::nameserver_members').each_with_index do |nameserver_member, index| -%>
+                      NS ns<%= index + 1%>.<%= scope.lookupvar('::openshift_origin::domain') %>.
+<% end -%>
+<% else -%>
+                      NS ns1.<%= scope.lookupvar('::openshift_origin::domain') %>.
+<% end -%>
 $ORIGIN <%= scope.lookupvar('::openshift_origin::domain') %>.
-<% if scope.lookupvar('::openshift_origin::nameserver_hostname').end_with?(scope.lookupvar('::openshift_origin::domain')) %>
-<%= scope.lookupvar('::openshift_origin::nameserver_hostname').split('.').first %>	              A        <%= scope.lookupvar('::openshift_origin::nameserver_ip_addr') %>
-<% end %>
+<% if scope.lookupvar('::openshift_origin::nameserver_ha') then
+scope.lookupvar('::openshift_origin::nameserver_members').each_with_index do |nameserver_member, index| -%>
+ns<%= index + 1%>     A        <%= nameserver_member %>
+<% end -%>
+<% else -%>
+ns1	              A        127.0.0.1
+<% end -%>
