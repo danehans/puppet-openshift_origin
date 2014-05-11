@@ -55,6 +55,12 @@ class openshift_origin::mcollective_server {
       require => Package['mcollective'],
       notify  => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"]
     }
+
+    exec { 'systemd-daemon-reload':
+      command     => '/bin/systemctl --system daemon-reload',
+      refreshonly => true,
+      notify      => Service["${::openshift_origin::params::ruby_scl_prefix}mcollective"],
+    }
   } else {
     $require_real = File['mcollective server config']
   }
