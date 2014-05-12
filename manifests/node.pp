@@ -35,7 +35,7 @@ class openshift_origin::node {
       'make',
       'oddjob',
       'dbus',
-      'vim-enhanced',
+      'vim-minimal',
       'mlocate',
       'screen',
     ]:
